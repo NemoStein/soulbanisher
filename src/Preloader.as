@@ -45,8 +45,11 @@ package
 		private var _adReady:Boolean;
 		private var _loadReady:Boolean;
 		
-		static private var _logger:TextField;
 		private var _timer:Timer;
+		private var _ignoreAd:Boolean;
+		
+		static private var _logger:TextField;
+		
 		static public function log(... rest:Array):void
 		{
 			_logger.appendText("\r" + rest.join(" "));
@@ -144,13 +147,12 @@ package
 			
 			_timer = new Timer(1000, 1);
 			_timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerTimerComplete);
-			_timer.start();
 		}
 		
 		private function onTimerTimerComplete(event:TimerEvent):void
 		{
 			_timer.removeEventListener(TimerEvent.TIMER_COMPLETE, onTimerTimerComplete);
-			_adReady = true;
+			_ignoreAd = true;
 		}
 		
 		private function onAddedToStage(event:Event = null):void
@@ -183,7 +185,8 @@ package
 				}
 				
 			}
-			else if (_loadReady)
+			
+			if (_loadReady && (_adReady || _ignoreAd))
 			{
 				removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 				
@@ -210,26 +213,30 @@ package
 			loaderInfo.removeEventListener(ProgressEvent.PROGRESS, onLoaderInfoProgress);
 			loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onLoaderInfoIoError);
 			
+			_timer.start();
 			_loadReady = true;
 		}
 		
 		private function startup():void
 		{
-			removeChild(_container);
-			removeChild(_adContainer);
-			
-			_timer.removeEventListener(TimerEvent.TIMER_COMPLETE, onTimerTimerComplete);
-			_timer = null;
-			
-			_container = null;
-			_mask = null;
-			_numbers = null;
-			_playButton = null;
-			
-			System.pauseForGCIfCollectionImminent(0);
-			
-			var mainClass:Class = getDefinitionByName("Main") as Class;
-			addChild(new mainClass() as DisplayObject);
+			if (!FGLHelper.shown)
+			{
+				removeChild(_container);
+				removeChild(_adContainer);
+				
+				_timer.removeEventListener(TimerEvent.TIMER_COMPLETE, onTimerTimerComplete);
+				_timer = null;
+				
+				_container = null;
+				_mask = null;
+				_numbers = null;
+				_playButton = null;
+				
+				System.pauseForGCIfCollectionImminent(0);
+				
+				var mainClass:Class = getDefinitionByName("Main") as Class;
+				addChild(new mainClass() as DisplayObject);
+			}
 		}
 	}
 }

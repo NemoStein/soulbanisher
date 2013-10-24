@@ -3,7 +3,9 @@ package sourbit.games.soulbanisher
 	import com.greensock.TweenMax;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.system.System;
+	import flash.utils.Timer;
 	import sourbit.games.soulbanisher.entities.Entity;
 	import sourbit.games.soulbanisher.tracking.FGLHelper;
 	
@@ -11,6 +13,9 @@ package sourbit.games.soulbanisher
 	{
 		private var _text:GameText;
 		private var _adContainer:MovieClip;
+		
+		private var _timer:Timer;
+		private var _ignoreAd:Boolean;
 		
 		override protected function initialize():void
 		{
@@ -40,13 +45,23 @@ package sourbit.games.soulbanisher
 			addChild(FGLHelper.container);
 			
 			_text.addEventListener(MouseEvent.CLICK, onClick);
+			
+			_timer = new Timer(1000, 1);
+			_timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerTimerComplete);
+		}
+		
+		private function onTimerTimerComplete(event:TimerEvent):void
+		{
+			_ignoreAd = true;
 		}
 		
 		public function show():void
 		{
 			if (!visible)
 			{
-				trace("Showing pause");
+				_ignoreAd = false;
+				_timer.start();
+				
 				System.pauseForGCIfCollectionImminent(0);
 				TweenMax.pauseAll();
 				
@@ -74,15 +89,17 @@ package sourbit.games.soulbanisher
 			
 			if (visible && !FGLHelper.shown)
 			{
-				hide();
+				onClick(null);
 			}
 		}
 		
 		private function onClick(event:MouseEvent):void
 		{
-			hide();
-			
-			GamePlay.paused = false;
+			if (_ignoreAd || !FGLHelper.shown)
+			{
+				hide();
+				GamePlay.paused = false;
+			}
 		}
 	}
 }
