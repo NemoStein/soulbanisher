@@ -13,6 +13,7 @@ package sourbit.games.soulbanisher.tracking
 		static private var _ready:Boolean;
 		static private var _failed:Boolean;
 		static private var _container:Sprite;
+		static private var _shown:Boolean;
 		
 		static public function connect():Sprite
 		{
@@ -24,6 +25,8 @@ package sourbit.games.soulbanisher.tracking
 				
 				_fglAds.addEventListener(FGLAds.EVT_API_READY, onFglAdsEvtApiReady);
 				_fglAds.addEventListener(FGLAds.EVT_AD_LOADING_ERROR, onFglAdsEvtAdLoadingError);
+				_fglAds.addEventListener(FGLAds.EVT_AD_SHOWN, onFglAdsEvtAdShown);
+				_fglAds.addEventListener(FGLAds.EVT_AD_CLOSED, onFglAdsEvtAdClosed);
 			}
 			
 			return _container;
@@ -37,14 +40,24 @@ package sourbit.games.soulbanisher.tracking
 			}
 		}
 		
-		static private function onFglAdsEvtApiReady(e:Event):void
+		static private function onFglAdsEvtApiReady(event:Event):void
 		{
 			_ready = true;
 		}
 		
-		static private function onFglAdsEvtAdLoadingError(e:Event):void
+		static private function onFglAdsEvtAdLoadingError(event:Event):void
 		{
 			_failed = true;
+		}
+		
+		static private function onFglAdsEvtAdShown(event:Event):void
+		{
+			_shown = true;
+		}
+		
+		static private function onFglAdsEvtAdClosed(event:Event):void
+		{
+			_shown = false;
 		}
 		
 		static public function get ready():Boolean
@@ -60,6 +73,11 @@ package sourbit.games.soulbanisher.tracking
 		static public function get container():Sprite
 		{
 			return _container;
+		}
+		
+		static public function get shown():Boolean
+		{
+			return _shown;
 		}
 	}
 }

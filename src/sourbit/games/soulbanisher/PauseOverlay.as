@@ -46,6 +46,7 @@ package sourbit.games.soulbanisher
 		{
 			if (!visible)
 			{
+				trace("Showing pause");
 				System.pauseForGCIfCollectionImminent(0);
 				TweenMax.pauseAll();
 				
@@ -65,6 +66,16 @@ package sourbit.games.soulbanisher
 			
 			System.pauseForGCIfCollectionImminent(0);
 			TweenMax.resumeAll();
+		}
+		
+		override protected function update():void
+		{
+			super.update();
+			
+			if (visible && !FGLHelper.shown)
+			{
+				hide();
+			}
 		}
 		
 		private function onClick(event:MouseEvent):void
